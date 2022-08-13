@@ -5,10 +5,9 @@
 #include <pthread.h>
 #include <math.h>
 #include <time.h>
+#define MODE 128
 #include "utility.h"
-#include "tinyjambu_permutation.h"
 
-#define NROF_THREADS 1
 
 struct SumArgs{
     uint8_t *key;
@@ -26,6 +25,15 @@ uint64_t HIT = 0;
 
 pthread_mutex_t mutex;
 
+void apply(const unsigned int *inputs, 
+		   const unsigned char *key, 
+		         unsigned int number_of_steps,
+		         unsigned int *outputs){
+	for(int i=0; i<4; i++){
+		outputs[i] = inputs[i];
+	}
+	state_update(outputs, key, number_of_steps);	      
+}
 
 void get_related_key_diff(int *pos, int nrof_pos, uint8_t *input_key_diff){
 	for(int i=0; i<16; i++){
@@ -60,13 +68,13 @@ void* encrypt_over_ranges(void *args){
     SumArgs *sumargs = (SumArgs*) args;
 
 	uint8_t state_bytes[16];
-	generate_random_state_or_key(state_bytes);
+	generate_random_state_or_key(state_bytes, STATE_BYTE);
 	uint32_t *state1 = (uint32_t *)state_bytes;
 	
 	uint32_t state2[4];
 
-	uint32_t output_state1[4];
-	uint32_t output_state2[4];
+	uint32_t output1[4];
+	uint32_t output2[4];
 	
 	//input plaintext difference is at bit 127
 	uint32_t input_diff[4] = {0x00000000, 0x00000000, 0x00000000, 0x80000000}; 
@@ -84,27 +92,15 @@ void* encrypt_over_ranges(void *args){
     	for(int j=0; j<16; j++){
     		key2[j] = *(sumargs->key + j) ^ input_key_diff[j];
     	}
-    	apply(state1, sumargs->key, sumargs->rounds, 0, output_state1);
-    	apply(state2, key2, sumargs->rounds, 0, output_state2);
+    	apply(state1, sumargs->key, sumargs->rounds, output1);
+    	apply(state2, key2, sumargs->rounds, output2);
     	
     	pthread_mutex_lock(&mutex);
-        if (check_output_diff(output_state1, output_state2) == 1){
+        if (check_output_diff(output1, output2) == 1){
         	sumargs->nrof_hit++;
-        	/*
-        	printf("============Matched=============\n");
-        	printf("Key\n");
-        	printreg(sumargs->key);
-        	printreg(key2);
-        	printf("The State is: %ld\n",i);
-        	printreg(state1);
-        	printreg(state2);
-        	printf("output\n");
-        	printreg(output_state1);
-        	printreg(output_state2);
-	    	printf("Output Difference\n");
-	    	xor_32(output_state1, output_state2);
-	    	printreg(output_state2);
-	    	*/
+        	
+        	printf("%ld ============Matched=============\n",i);
+        	print_info(output1, output2, sumargs->key, key2);
         }
         pthread_mutex_unlock(&mutex);
 		
@@ -145,9 +141,9 @@ void apply_related_key_threaded(uint8_t *key, int log_data, int rounds){
 void test_related_key(int log_of_data, int rounds){
     uint8_t key[16];
     for(uint64_t i=0; i < 32; i++){
-    	generate_random_state_or_key(key);
+    	generate_random_state_or_key(key, KEY_BYTE);
         printf("\nKey: %ld\n",i);
-        printreg(key);
+        printreg(key,KEY_BYTE);
         apply_related_key_threaded(key, log_of_data, rounds);
         TOTAL_DATA = TOTAL_DATA + (1ULL << log_of_data);
     }
