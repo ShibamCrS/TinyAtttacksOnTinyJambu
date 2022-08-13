@@ -105,7 +105,13 @@ void* encrypt_over_ranges(void *args){
     	}
     	apply(key1, nonce1, output1);
     	apply(key2, nonce2, output2);
-
+    	
+    	/*
+    	pthread_mutex_lock(&mutex);
+        print_info_mode(output1, output2, key1, key2, nonce1, nonce2);
+        pthread_mutex_unlock(&mutex);
+        */
+        
         if (check_output_diff(output1, output2, sumargs->expected_diff) == 1){
             sumargs->nrof_hit++;
             pthread_mutex_lock(&mutex);
@@ -155,7 +161,7 @@ void apply_related_key_threaded(int log_data, uint32_t *expected_diff, int round
 
 void test_related_key(){
     int log_of_key = 24;
-	int rounds = 4480;
+	int rounds = 3200;
 	uint32_t expected_diff[4] = {0x00000000, 0x00000000, 0x00000000, 0x00000000};
     
     apply_related_key_threaded(log_of_key, expected_diff, rounds);
@@ -169,6 +175,7 @@ void test_related_key(){
 }
 
 int main(){
-	srand(time(NULL));
+	xx_initialize(SEED);
+    //printreg(SEED, 32);
 	test_related_key();
 }

@@ -1,5 +1,6 @@
 #include "configure.h"
-//#include "../xoshiro256plusplus.h"
+#include "../xoshiro256plusplus.h"
+uint64_t SEED[4];
 void printreg_to_file(const void *a, int nrof_byte, FILE *fp){
     int i;
     unsigned char *f = (unsigned char *)a;
@@ -23,27 +24,23 @@ void xor_8(uint8_t *source1, uint8_t *source2, uint8_t *dest){
 		dest[i] = source1[i] ^ source2[i];
 	}
 }
-/*
 void generate_random_state_or_key(uint8_t *random_data, int nrof_byte){
-    uint64_t seed[4];
-    xx_initialize(seed);
-    printreg(seed, 32);
     int required_call = nrof_byte/8 + 1;
     uint64_t *random64 = (uint64_t *)malloc(required_call*sizeof(uint64_t));
     for(int i=0; i<required_call; i++){
-        random64[i] = xx_next(seed);
+        random64[i] = xx_next(SEED);
     }
     memcpy(random_data, random64, nrof_byte);
     free(random64);
 }
-*/
+/*
 void generate_random_state_or_key(uint8_t *random_data, int nrof_byte){
 		for(int i=0; i<nrof_byte; i++){
 			uint8_t a = rand() % 256;
 			random_data[i] = a;
 		}
 }
-
+*/
 void print_info(uint32_t *output1, uint32_t *output2, 
                 uint8_t *key1, uint8_t *key2){
     printf("key\n");
