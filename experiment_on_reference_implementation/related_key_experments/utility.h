@@ -41,6 +41,35 @@ void generate_random_state_or_key(uint8_t *random_data, int nrof_byte){
 		}
 }
 */
+
+void get_related_key_diff(int *pos, int nrof_pos, uint8_t *input_key_diff){
+	for(int i=0; i<KEY_BYTE; i++){
+		input_key_diff[i] = 0x00;
+	}
+	
+    for(int i=0; i < nrof_pos; i++){
+    	int byte_pos = (pos[i] / 8);
+    	int bit_pos  = pos[i] % 8;
+    	input_key_diff[byte_pos] |= (1 << bit_pos); 
+    }
+    //printf("Input Key Diff :");
+	//printreg192(input_key_diff);
+}
+
+void get_nonce_diff(int *pos, int nrof_pos, uint8_t *nonce_diff){
+	for(int i=0; i<NONCE_BYTE; i++){
+		nonce_diff[i] = 0x00;
+	}
+	
+    for(int i=0; i < nrof_pos; i++){
+    	int byte_pos = (pos[i] / 8);
+    	int bit_pos  = pos[i] % 8;
+    	nonce_diff[byte_pos] |= (1 << bit_pos); 
+    }
+    //printf("Input Key Diff :");
+	//printreg192(input_key_diff);
+}
+
 void print_info(uint32_t *output1, uint32_t *output2, 
                 uint8_t *key1, uint8_t *key2){
     printf("key\n");
