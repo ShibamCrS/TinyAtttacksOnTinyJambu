@@ -2,7 +2,7 @@
     #define MODE 256 
 #endif
 
-#define NROF_THREADS 8
+#define NROF_THREADS 16
 #define STATE_BYTE 16
 #define NONCE_BYTE 12
 

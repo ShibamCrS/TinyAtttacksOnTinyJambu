@@ -112,6 +112,12 @@ void print_info_mode(uint32_t *output1, uint32_t *output2,
                 uint8_t *nonce1, uint8_t *nonce2){
     print_info_mode_to_file(output1, output2, key1, key2, nonce1, nonce2, stdout);             
 }
+
+#ifndef LOK
+#define LOK 24
+#define EXP 10
+#endif
+
 void calculateSD(uint64_t *data) {
     uint64_t sum = 0UL;
     long double mean;
