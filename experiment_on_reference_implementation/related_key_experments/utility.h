@@ -1,6 +1,7 @@
 #include "configure.h"
 #include "../xoshiro256plusplus.h"
 uint64_t SEED[4];
+
 void printreg_to_file(const void *a, int nrof_byte, FILE *fp){
     int i;
     unsigned char *f = (unsigned char *)a;
@@ -110,4 +111,27 @@ void print_info_mode(uint32_t *output1, uint32_t *output2,
                 uint8_t *key1, uint8_t *key2, 
                 uint8_t *nonce1, uint8_t *nonce2){
     print_info_mode_to_file(output1, output2, key1, key2, nonce1, nonce2, stdout);             
+}
+void calculateSD(uint64_t *data) {
+    uint64_t sum = 0UL;
+    long double mean;
+    long double sd = 0.0;
+
+    int i;
+    for (i = 0; i < EXP; i++){
+        sum += data[i];
+    }
+    mean = ( (long double)sum) /( (long double)EXP);
+    for (i = 0; i < EXP; i++){
+        long double temp = ((long double)(data[i])) - mean;
+        sd += pow(temp, 2);
+    }
+    sd = sd/((long double)EXP);
+    sd = sqrt(sd);
+    mean = mean / ((long double)(1UL << LOK));
+    sd   =   sd / ((long double)(1UL<<LOK));
+    long double lmean = logl(mean)/logl(2.0);
+    long double lsd = logl(sd)/logl(2.0);
+    printf("AVERAGE PROBABILITY: (2^%5.3Lf) AVERAGE SD: (2^%5.3Lf)\n",lmean, lsd);
+
 }
